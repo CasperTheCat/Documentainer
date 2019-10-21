@@ -6,12 +6,13 @@ app = Flask(__name__)
 
 #methods = ['POST']
 
-supportedToTypes = ["Latex", "Markdown"]
+supportedToTypes = ["Latex", "Markdown", "HTML"]
 supportedFromTypes = supportedToTypes # Redundant
 
 typeTranslation = {
     'Latex': 'tex',
-    'Markdown': 'md'
+    'Markdown': 'md',
+    'HTML': 'html'
 }
 
 def GenerateResponse(text: str, status: int = 200):
