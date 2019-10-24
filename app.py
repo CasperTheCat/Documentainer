@@ -25,14 +25,25 @@ def CheckSupport(toLang: str, fromLang: str) -> bool:
     return toLang in supportedToTypes and fromLang in supportedFromTypes
 
 
-def Convert(toLang: str, fromLang: str, data: str):
-    odata = pypandoc.convert_text(data, typeTranslation[toLang], format=typeTranslation[fromLang], extra_args=['-s'])
+def Convert(toLang: str, fromLang: str, data: str, useStandalone: bool):
+    args = []
+
+    if useStandalone:
+        args.append('-s')
+
+
+    odata = pypandoc.convert_text(data, typeTranslation[toLang], format=typeTranslation[fromLang], extra_args=args)
     return BytesIO(odata.encode()), '.' + typeTranslation[toLang]
 
 @app.route('/', methods = ['GET', 'POST'])
 def main():
+    # Args
     toLang = request.args.get("to", "Latex")
     fromLang = request.args.get("from", "Markdown")
+    standalone = request.args.get("standalone","DEFAULT")
+
+    # Flags
+    bUseStandalone = (not standalone == "DEFAULT")
 
     #print('{} {}'.format(toLang, fromLang))
     IsSupported = CheckSupport(toLang, fromLang)
@@ -44,7 +55,7 @@ def main():
             try:
                 #reqData = request.get_json(silent=True)
                 reqData = request.data
-                output, extension = Convert(toLang, fromLang, reqData)
+                output, extension = Convert(toLang, fromLang, reqData, bUseStandalone)
                 response = send_file(output, as_attachment=True, attachment_filename='download' + extension)
                 return response
             except Exception as e:
